@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<repositories version="1.0">
+  <repo quality="experimental" status="unofficial">
+    <name>my-overlay</name>
+      <description lang="en">duplex's Custom Gentoo Overlay.</description>
+        <homepage>https://github.com/duplexsystem/my-overlay</homepage>
+        <owner type="person">
+            <name>duplex</name>
+            <email>duplexsys@protonmail.com</email>
+        </owner>
+        <source type="git">git://github.com/duplexsystem/my-overlay.git</source>
+        <feed>https://github.com/my-name/duplexsystem/commits/master.atom</feed>
+  </repo>
+</repositories>
