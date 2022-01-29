@@ -362,6 +362,7 @@ multilib_src_configure() {
 
 		# disable OCaml bindings (now in dev-ml/llvm-ocaml)
 		-DOCAMLFIND=NO
+		-DLLVM_INSTALL_BINUTILS_SYMLINKS=ON
 	)
 
 	if is_libcxx_linked; then
@@ -412,7 +413,7 @@ multilib_src_configure() {
 	fi
 	
 	use llvm-binutils && mycmakeargs+=(
-		-DLLVM_INSTALL_BINUTILS_SYMLINKS=ON
+		
 	)	
 
 	if tc-is-cross-compiler; then
