@@ -293,8 +293,11 @@ get_distribution_components() {
 
 			# python modules
 			opt-viewer
-			
-		    	addr2line
+
+		)
+		
+		use llvm-binutils && out+=(
+			addr2line
 			ar
 			c++filt
 			ranlib
@@ -306,7 +309,6 @@ get_distribution_components() {
 			strings
 			strip
 		)
-
 		if llvm_are_manpages_built; then
 			out+=(
 				# manpages
@@ -374,7 +376,6 @@ multilib_src_configure() {
 
 		# disable OCaml bindings (now in dev-ml/llvm-ocaml)
 		-DOCAMLFIND=NO
-		-DLLVM_INSTALL_BINUTILS_SYMLINKS=ON
 	)
 
 	if is_libcxx_linked; then
@@ -425,7 +426,7 @@ multilib_src_configure() {
 	fi
 	
 	use llvm-binutils && mycmakeargs+=(
-		
+		-DLLVM_INSTALL_BINUTILS_SYMLINKS=ON
 	)	
 
 	if tc-is-cross-compiler; then
