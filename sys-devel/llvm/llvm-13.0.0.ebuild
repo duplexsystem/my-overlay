@@ -293,6 +293,18 @@ get_distribution_components() {
 
 			# python modules
 			opt-viewer
+			
+		    	addr2line
+			ar
+			c++filt
+			ranlib
+			nm
+			objcopy
+			objdump
+			readelf
+			size
+			strings
+			strip
 		)
 
 		if llvm_are_manpages_built; then
