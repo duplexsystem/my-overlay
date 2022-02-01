@@ -7,7 +7,7 @@ inherit toolchain-funcs multilib-minimal
 
 DESCRIPTION="netbsd-libcurses portable edition"
 HOMEPAGE="https://github.com/sabotage-linux/netbsd-curses"
-SRC_URI="https://github.com/sabotage-linux/netbsd-curses/archive/refs/tags/v${PN}.tar.gz"
+SRC_URI="https://github.com/sabotage-linux/netbsd-curses/archive/refs/tags/v${PV}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
