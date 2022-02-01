@@ -2,8 +2,10 @@
 -*app-arch/gzip
 -*sys-libs/ncurses
 -*sys-devel/make
+-*dev-libs/redline
 
 sys-libs/zlib-ng
 app-arch/pigz
 sys-libs/netbsd-curses
 sys-devel/bmake
+dev-libs/editline
