@@ -1,0 +1,3 @@
+sys-libs/zlib-ng compat
+app-arch/pigz symlink
+sys-devel/bmake symlink
