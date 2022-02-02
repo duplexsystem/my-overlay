@@ -1,0 +1,31 @@
+# Copyright 1999-2018 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+EAPI=8
+
+inherit git-r3 toolchain-funcs multilib-minimal
+
+DESCRIPTION="An experimental GNU make clone"
+HOMEPAGE="https://github.com/google/kati"
+SRC_URI=""
+EGIT_REPO_URI="https://github.com/google/kati.git"
+
+LICENSE="Apache-2.0"
+SLOT="0"
+IUSE="symlink"
+KEYWORDS="~amd64 ~x86"
+
+RDEPEND="!sys-libs/ncurses"
+DEPEND="
+	${RDEPEND}
+	dev-util/ninja"
+
+src_compile() {
+	emake CC="$(tc-getCC)" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+}
+
+src_install() {
+	if use symlink; then
+		dosym c${PN} /usr/bin/make
+	fi
+}
