@@ -18,11 +18,11 @@ KEYWORDS="~amd64 ~x86"
 BDEPEND="dev-util/ninja"
 
 src_compile() {
-	emake CC="$(tc-getCC)" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+	emake CC="$(tc-getCC)" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" ckati
 }
 
 src_install() {
-	emake ckati
+	dobin c${PN}
 	
 	if use symlink; then
 		dosym c${PN} /usr/bin/make
