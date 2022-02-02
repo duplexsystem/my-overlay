@@ -15,10 +15,7 @@ SLOT="0"
 IUSE="symlink"
 KEYWORDS="~amd64 ~x86"
 
-RDEPEND="!sys-libs/ncurses"
-DEPEND="
-	${RDEPEND}
-	dev-util/ninja"
+BDEPEND="dev-util/ninja"
 
 src_compile() {
 	emake CC="$(tc-getCC)" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
