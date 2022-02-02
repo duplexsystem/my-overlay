@@ -22,6 +22,8 @@ src_compile() {
 }
 
 src_install() {
+	emake install
+	
 	if use symlink; then
 		dosym c${PN} /usr/bin/make
 	fi
