@@ -7,5 +7,5 @@
 sys-libs/zlib-ng
 app-arch/pigz
 sys-libs/netbsd-curses
-sys-devel/bmake
+sys-devel/kati
 dev-libs/editline
