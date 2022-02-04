@@ -295,7 +295,7 @@ get_distribution_components() {
 			opt-viewer
 
 		)
-		
+
 		use llvm-binutils && out+=(
 			addr2line
 			ar
@@ -387,8 +387,8 @@ multilib_src_configure() {
 			-DLLVM_ENABLE_LIBCXX=ON
 		)
 	fi
-	
-	
+
+
 
 #	Note: go bindings have no CMake rules at the moment
 #	but let's kill the check in case they are introduced
@@ -424,10 +424,10 @@ multilib_src_configure() {
 			-DLLVM_BINUTILS_INCDIR="${EPREFIX}"/usr/include
 		)
 	fi
-	
+
 	use llvm-binutils && mycmakeargs+=(
 		-DLLVM_INSTALL_BINUTILS_SYMLINKS=ON
-	)	
+	)
 
 	if tc-is-cross-compiler; then
 		local tblgen="${EPREFIX}/usr/lib/llvm/${SLOT}/bin/llvm-tblgen"
