@@ -1,4 +1,4 @@
-app-arch/gzip
+app-arch/gzip-1.12
 sys-libs/ncurses
-sys-devel/make
+sys-devel/make-4.3
 dev-libs/readline

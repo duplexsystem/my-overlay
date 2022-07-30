@@ -1,9 +1,5 @@
 -*app-arch/gzip
--*sys-libs/ncurses
 -*sys-devel/make
--*dev-libs/readline
 
 *app-arch/pigz
-*sys-libs/netbsd-curses
 *sys-devel/kati
-*dev-libs/editline
