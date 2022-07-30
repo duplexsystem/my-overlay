@@ -10,7 +10,6 @@ HOMEPAGE="https://github.com/google/kati"
 SRC_URI=""
 EGIT_REPO_URI="https://github.com/google/kati.git"
 PATCHES=(
-	"${FILESDIR}/kati-fix-implicit-rules-with-no-makefile.patch"
 	"${FILESDIR}/patch.patch"
 )
 
