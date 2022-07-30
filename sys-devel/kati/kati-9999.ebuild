@@ -11,7 +11,7 @@ SRC_URI=""
 EGIT_REPO_URI="https://github.com/google/kati.git"
 PATCHES=(
 	"${FILESDIR}/kati-fix-implicit-rules-with-no-makefile.patch"
-	"${FILESDIR}/add_support.patch"
+	"${FILESDIR}/patch.patch"
 )
 
 LICENSE="Apache-2.0"
