@@ -54,5 +54,6 @@ src_test() {
 
 src_install() {
 	save_config .config
-	make install
+	newbin generated/unstripped/${PN} ${PN}
+	for i in $(generated/unstripped/${PN} --long); do dosym /bin/${PN} $i; done
 }
