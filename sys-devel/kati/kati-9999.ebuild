@@ -3,32 +3,30 @@
 
 EAPI=8
 
-inherit git-r3 toolchain-funcs multilib-minimal
+inherit git-r3 toolchain-funcs flag-o-matic meson
 
 DESCRIPTION="An experimental GNU make clone"
 HOMEPAGE="https://github.com/google/kati"
 SRC_URI=""
-EGIT_REPO_URI="https://github.com/google/kati.git"
-PATCHES=(
-	"${FILESDIR}/patch.patch"
-	"${FILESDIR}/56e553.patch"
-)
+EGIT_REPO_URI="https://github.com/duplexsystem/kati.git"
 
 LICENSE="Apache-2.0"
 SLOT="0"
 IUSE="symlink"
 KEYWORDS="~amd64 ~x86"
 
-BDEPEND="dev-util/ninja"
+BDEPEND="virtual/pkgconfig"
 
 src_compile() {
-	emake CC="$(tc-getCC)" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" ckati
+	meson_src_configure
 }
 
 src_install() {
-	dobin c${PN}
+	meson_src_install
+
+	dobin "${ED}"/usr/bin/${PN}
 	
 	if use symlink; then
-		dosym c${PN} /usr/bin/make
+		dosym ${PN} /usr/bin/make
 	fi
 }
