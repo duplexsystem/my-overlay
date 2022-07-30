@@ -17,10 +17,6 @@ KEYWORDS="~amd64 ~x86"
 
 BDEPEND="virtual/pkgconfig"
 
-src_compile() {
-	meson_src_configure
-}
-
 src_install() {
 	meson_src_install
 
