@@ -1,0 +1,212 @@
+diff --git a/AUTHORS b/AUTHORS
+index 0acaa9e..79bbb8f 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -8,6 +8,7 @@
+ #
+ # Please keep the list sorted.
+ 
++Delilah Hoare <delilah@dhoare.me>
+ Google Inc.
+ Koichi Shiraishi <zchee.io@gmail.com>
+ Kouhei Sutou <kou@cozmixng.org>
+diff --git a/CONTRIBUTORS b/CONTRIBUTORS
+index 3c2e7d4..3d447d5 100644
+--- a/CONTRIBUTORS
++++ b/CONTRIBUTORS
+@@ -24,6 +24,7 @@
+ 
+ Colin Cross <ccross@google.com>
+ Dan Willemsen <dwillemsen@google.com>
++Delilah Hoare <delilah@dhoare.me>
+ Fumitoshi Ukai <ukai@google.com>
+ Koichi Shiraishi <zchee.io@gmail.com>
+ Kouhei Sutou <kou@cozmixng.org>
+diff --git a/src/command.cc b/src/command.cc
+index 5268b9e..da217bc 100644
+--- a/src/command.cc
++++ b/src/command.cc
+@@ -21,6 +21,7 @@
+ 
+ #include "dep.h"
+ #include "eval.h"
++#include "fileutil.h"
+ #include "flags.h"
+ #include "log.h"
+ #include "strutil.h"
+@@ -67,6 +68,7 @@ DECLARE_AUTO_VAR_CLASS(AutoLessVar);
+ DECLARE_AUTO_VAR_CLASS(AutoHatVar);
+ DECLARE_AUTO_VAR_CLASS(AutoPlusVar);
+ DECLARE_AUTO_VAR_CLASS(AutoStarVar);
++DECLARE_AUTO_VAR_CLASS(AutoQuestionVar);
+ DECLARE_AUTO_VAR_CLASS(AutoNotImplementedVar);
+ 
+ class AutoSuffixDVar : public AutoVar {
+@@ -125,6 +127,42 @@ void AutoStarVar::Eval(Evaluator*, string* s) const {
+   pat.Stem(n->output.str()).AppendToString(s);
+ }
+ 
++void AutoQuestionVar::Eval(Evaluator* ev, string* s) const {
++  unordered_set<StringPiece> seen;
++
++  if (ev->avoid_io()) {
++    // Check timestamps using the shell at the start of rule execution
++    // instead.
++    *s += "${KATI_NEW_INPUTS}";
++    if (!ce_->found_new_inputs()) {
++      string def;
++
++      WordWriter ww(&def);
++      ww.Write("KATI_NEW_INPUTS=$(find");
++      for (Symbol ai : ce_->current_dep_node()->actual_inputs) {
++        if (seen.insert(ai.str()).second) {
++          ww.Write(ai.str());
++        }
++      }
++      ww.Write("$(test -e");
++      ww.Write(ce_->current_dep_node()->output.str());
++      ww.Write("&& echo -newer");
++      ww.Write(ce_->current_dep_node()->output.str());
++      ww.Write(")) && export KATI_NEW_INPUTS");
++      ev->add_delayed_output_command(def);
++      ce_->set_found_new_inputs(true);
++    }
++  } else {
++    WordWriter ww(s);
++    double target_age = GetTimestamp(ce_->current_dep_node()->output.str());
++    for (Symbol ai : ce_->current_dep_node()->actual_inputs) {
++      if (seen.insert(ai.str()).second && GetTimestamp(ai.str()) > target_age) {
++        ww.Write(ai.str());
++      }
++    }
++  }
++}
++
+ void AutoNotImplementedVar::Eval(Evaluator* ev, string*) const {
+   ev->Error(StringPrintf("Automatic variable `$%s' isn't supported yet", sym_));
+ }
+@@ -179,9 +217,9 @@ CommandEvaluator::CommandEvaluator(Evaluator* ev) : ev_(ev) {
+   INSERT_AUTO_VAR(AutoHatVar, "^");
+   INSERT_AUTO_VAR(AutoPlusVar, "+");
+   INSERT_AUTO_VAR(AutoStarVar, "*");
++  INSERT_AUTO_VAR(AutoQuestionVar, "?");
+   // TODO: Implement them.
+   INSERT_AUTO_VAR(AutoNotImplementedVar, "%");
+-  INSERT_AUTO_VAR(AutoNotImplementedVar, "?");
+   INSERT_AUTO_VAR(AutoNotImplementedVar, "|");
+ }
+ 
+@@ -191,6 +229,7 @@ std::vector<Command> CommandEvaluator::Eval(const DepNode& n) {
+   ev_->set_current_scope(n.rule_vars);
+   ev_->SetEvaluatingCommand(true);
+   current_dep_node_ = &n;
++  found_new_inputs_ = false;
+   for (Value* v : n.cmds) {
+     ev_->set_loc(v->Location());
+     const string&& cmds_buf = v->Eval(ev_);
+@@ -231,6 +270,7 @@ std::vector<Command> CommandEvaluator::Eval(const DepNode& n) {
+       c.cmd = cmd;
+       c.echo = false;
+       c.ignore_error = false;
++      c.force_no_subshell = true;
+     }
+     // Prepend |output_commands|.
+     result.swap(output_commands);
+diff --git a/src/command.h b/src/command.h
+index 017f6bb..fb1ade3 100644
+--- a/src/command.h
++++ b/src/command.h
+@@ -25,11 +25,13 @@ struct DepNode;
+ class Evaluator;
+ 
+ struct Command {
+-  explicit Command(Symbol o) : output(o), echo(true), ignore_error(false) {}
++  explicit Command(Symbol o)
++      : output(o), echo(true), ignore_error(false), force_no_subshell(false) {}
+   Symbol output;
+   string cmd;
+   bool echo;
+   bool ignore_error;
++  bool force_no_subshell;
+ };
+ 
+ class CommandEvaluator {
+@@ -38,10 +40,13 @@ class CommandEvaluator {
+   std::vector<Command> Eval(const DepNode& n);
+   const DepNode* current_dep_node() const { return current_dep_node_; }
+   Evaluator* evaluator() const { return ev_; }
++  bool found_new_inputs() const { return found_new_inputs_; }
++  void set_found_new_inputs(bool val) { found_new_inputs_ = val; }
+ 
+  private:
+   Evaluator* ev_;
+   const DepNode* current_dep_node_;
++  bool found_new_inputs_;
+ };
+ 
+ #endif  // COMMAND_H_
+diff --git a/src/ninja.cc b/src/ninja.cc
+index ee4a87f..11d713f 100644
+--- a/src/ninja.cc
++++ b/src/ninja.cc
+@@ -414,7 +414,8 @@ class NinjaGenerator {
+       while (isspace(*in))
+         in++;
+ 
+-      bool needs_subshell = (command_count > 1 || c.ignore_error);
++      bool needs_subshell =
++          (command_count > 1 || c.ignore_error) && !c.force_no_subshell;
+ 
+       if (needs_subshell)
+         *cmd_buf += '(';
+diff --git a/testcase/question.sh b/testcase/question.sh
+new file mode 100755
+index 0000000..0d3c7c4
+--- /dev/null
++++ b/testcase/question.sh
+@@ -0,0 +1,45 @@
++#!/bin/sh
++#
++# Copyright 2022 Google Inc. All rights reserved
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#      http:#www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++set -e
++
++mk="$@"
++
++cat <<EOF > Makefile
++
++all: d
++
++a:
++	echo a > a
++
++b:
++	echo b > b
++
++c:
++	echo c > c
++
++d: a b c
++	echo \$? > d
++
++EOF
++
++${mk}
++cat d
++sleep 0.1
++touch b
++${mk}
++cat d
++
