@@ -1,10 +1,8 @@
--*sys-libs/zlib
 -*app-arch/gzip
 -*sys-libs/ncurses
 -*sys-devel/make
 -*dev-libs/readline
 
-sys-libs/zlib-ng
 app-arch/pigz
 sys-libs/netbsd-curses
 sys-devel/kati
