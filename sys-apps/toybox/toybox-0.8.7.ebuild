@@ -49,7 +49,7 @@ src_compile() {
 }
 
 src_test() {
-	emake test
+	emake install
 }
 
 src_install() {
