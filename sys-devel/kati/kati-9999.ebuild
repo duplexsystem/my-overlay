@@ -19,8 +19,6 @@ BDEPEND="virtual/pkgconfig"
 
 src_install() {
 	meson_src_install
-
-	dobin "${ED}"/usr/bin/${PN}
 	
 	if use symlink; then
 		dosym ${PN} /usr/bin/make
