@@ -54,6 +54,5 @@ src_test() {
 
 src_install() {
 	save_config .config
-	newbin generated/unstripped/${PN} ${PN}
-	for i in $(/bin/toybox --long); do dosym /bin/${PN} $i; done
+	make install
 }
