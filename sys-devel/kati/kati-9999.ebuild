@@ -11,6 +11,7 @@ SRC_URI=""
 EGIT_REPO_URI="https://github.com/google/kati.git"
 PATCHES=(
 	"${FILESDIR}/patch.patch"
+	"${FILESDIR}/56e553.patch"
 )
 
 LICENSE="Apache-2.0"
